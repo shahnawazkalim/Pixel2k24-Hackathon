@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with AI</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            /* display: flex;
+            justify-content: center;
+            align-items: center; */
+            overflow-y: hidden;
+            height: 100vh;
+            margin: 0 ;
+            background-color: rgb(161 161 170);
+        }
+        .chatbox {
+            width: 80%;
+            max-width: 600px;
+            height: 70vh;
+            padding: 20px;
+            margin: 0 auto;
+
+            border: 1px solid rgb(161 161 170);;;
+            border-radius: 1rem;
+            box-shadow: 1px 1px 1rem rgb(161 161 170);; ;
+            
+            background-color: rgb(212 212 216);
+            
+            display: flex;
+            flex-direction: column;
+        }
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .user {
+            background-color: rgb(228 228 231);
+            /* align-self: flex; */
+            text-align: right;
+            font-weight: 400;
+            color : rgb(31 41 55);
+            display: inline-block;
+            
+            /* color:  rgb(228 228 231); */
+        }
+        .ai {
+            background-color: rgb(219, 219, 226);
+            align-self: flex-start;
+            font-weight: 400;
+            color: rgb(55 65 81);
+        }
+        .input-container {
+            display: flex;
+        }
+        #userInput {
+            flex: 1;
+            padding: 10px;
+            background-color: rgb(161 161 170);
+            border-style: none;
+            border-radius: 5px;
+            font-weight: 700;
+            color: black;
+        }
+        #userInput:focus{
+            border: none;
+        }
+        button {
+            padding: 10px 15px;
+            margin-left: 5px;
+            border: none;
+            background-color: rgb(37 99 235);
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .wrapper{
+            width: 100px;
+            margin: 0 auto;
+            /* margin-top: 100px; */
+            padding: 15px;
+            color: white;
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="wrapper" >
+        <h3>AI Chatbot</h3>
+    </div>
+    <div class="chatbox">
+        <div class="messages" id="messages"></div>
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Type a message..." />
+            <button onclick="sendMessage()" id="send-button">Send</button>
+        </div>
+    </div>
+
+
+    <script>
+        var input = document.getElementById("userInput");
+        input.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("send-button").click();
+            }
+        });
+
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput');
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Display user message
+            displayMessage(message, 'user');
+            userInput.value = '';
+
+            // Send the message to the Flask server
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+            if (data.response) {
+                displayMessage(data.response, 'ai');
+            } else {
+                displayMessage("Error: " + data.error, 'ai');
+            }
+        }
+
+        function displayMessage(text, sender) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.textContent = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
